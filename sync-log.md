@@ -4,3 +4,4 @@ Automatically updated by the [Sync Upstream](.github/workflows/sync-upstream.yml
 
 | Time (UTC) | Upstream | Commit | Status |
 | --- | --- | --- | --- |
+| 2026-10-25 08:18:59 | CoplayDev/unity-mcp | ed4e205d | Already up to date |
