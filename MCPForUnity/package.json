@@ -26,6 +26,11 @@
     "mcp-server",
     "mcp-client"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thanhdv143fork/unity-mcp.git",
+    "directory": "MCPForUnity"
+  },
   "author": {
     "name": "Coplay",
     "email": "support@coplay.dev",

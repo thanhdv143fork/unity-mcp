@@ -1,0 +1,68 @@
+name: Sync Upstream
+
+on:
+  schedule:
+    - cron: "17 2 * * *" # 09:17 daily (UTC+7)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout fork
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+
+      - name: Merge upstream and record sync
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          set -euo pipefail
+
+          UPSTREAM=$(gh api "repos/$GITHUB_REPOSITORY" --jq '.parent.full_name // empty')
+          if [ -z "$UPSTREAM" ]; then
+            echo "This repository is not a fork."
+            exit 1
+          fi
+
+          UPSTREAM_BRANCH=$(gh api "repos/$UPSTREAM" --jq '.default_branch')
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git remote add upstream "https://github.com/$UPSTREAM.git"
+          git fetch --no-tags upstream "$UPSTREAM_BRANCH"
+
+          UPSTREAM_SHA=$(git rev-parse FETCH_HEAD)
+          SHORT_SHA=$(git rev-parse --short FETCH_HEAD)
+
+          if git merge-base --is-ancestor "$UPSTREAM_SHA" HEAD; then
+            STATUS="Already up to date"
+          else
+            STATUS="Updated"
+          fi
+
+          # A conflict stops the job before any push or log entry.
+          git merge --no-edit "$UPSTREAM_SHA"
+
+          if [ ! -f sync-log.md ]; then
+            printf '# Upstream Sync Log\n\n| Time (UTC) | Upstream | Commit | Status |\n| --- | --- | --- | --- |\n' > sync-log.md
+          fi
+
+          TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S')
+          printf '| %s | %s | %s | %s |\n' "$TIMESTAMP" "$UPSTREAM" "$SHORT_SHA" "$STATUS" >> sync-log.md
+
+          git add -- sync-log.md
+          git commit -m "chore: record upstream sync ($SHORT_SHA)"
+          git push origin "HEAD:refs/heads/$TARGET_BRANCH"
