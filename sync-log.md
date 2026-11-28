@@ -36,3 +36,4 @@ Automatically updated by the [Sync Upstream](.github/workflows/sync-upstream.yml
 | 2026-11-25 11:23:54 | CoplayDev/unity-mcp | 19b66ece | Already up to date |
 | 2026-11-26 10:59:02 | CoplayDev/unity-mcp | 19b66ece | Already up to date |
 | 2026-11-27 10:57:10 | CoplayDev/unity-mcp | 19b66ece | Already up to date |
+| 2026-11-28 10:33:12 | CoplayDev/unity-mcp | 19b66ece | Already up to date |
